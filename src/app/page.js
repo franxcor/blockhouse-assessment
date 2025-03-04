@@ -1,11 +1,14 @@
 'use client'
 import styles from "./page.module.css";
 import axios from 'axios';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 export default function Home() {
   const [errors, setErrors] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [searchLoading, setSearchLoading] = useState(false);
+
   const [fiveCryptoData, setFiveCryptoData] = useState({
     one: {name: "", price: 0},
     two: {name: "", price: 0},
@@ -21,13 +24,15 @@ export default function Home() {
 
   const getFiveData = async () => {
     let response = null;
-    
+    setLoading(true);
     try {
       response = await axios.get('https://api.coincap.io/v2/assets/');
     } catch (ex) {
       response = null;
       console.log(ex);
       //reject(ex);
+    } finally {
+      setLoading(false);
     }
     if (response) {
       //lazy grab of first 5 names and prices
@@ -47,6 +52,7 @@ export default function Home() {
   const handleSearch = async (event) => {
     event.preventDefault();
     console.log(searched);
+    setSearchLoading(true);
     let response = null;
     try {
       console.log(`https://api.coincap.io/v2/assets/${searched}`)
@@ -54,6 +60,8 @@ export default function Home() {
     } catch (AxiosError) {
       setErrors("This cryptocurrency doesn't exist. Please try again")
       response = null;
+    } finally {
+      setSearchLoading(false);
     }
     if (response) {
       const json = Object.values(response.data['data']);
@@ -65,23 +73,27 @@ export default function Home() {
     }
   }
 
-  //window.onload = getFiveData();
+  useEffect(() => {
+    
+    console.log("effect running ")
+    if (typeof window !== 'undefined') {
+      window.onload = getFiveData();
+    }
+  }, [])
 
   return (
     <div className={styles.section}>
       <div className={styles.content}>
-      <button onClick={getFiveData}> Refresh </button>
-      <form onSubmit = {handleSearch}>
-        <input type="text" onChange={(e) => setSearched(e.target.value)} className={styles.search} placeholder="Enter a currency"></input>
-        <input type="submit" className={styles.searchSubmit} value="Search"></input>
-      </form>
         <div className = {styles.infoDisplay}>
-          <h1> Welcome to Crypto Tracker </h1>
+          <h1 className = {styles.title}> Welcome to Crypto Tracker </h1>
+          {/* data displays */}
           <div className = {styles.displays}>
             <div className={styles.mainDashboard}>
               <h1 className = {styles.dashTitle}> Top 5 Cryptocurrencies </h1>
-                <table>
-                  <thead>
+              {loading && <p> loading... </p>}  {/* semi-lazy load indicator */}
+              {fiveCryptoData.one.name !== "" &&
+                <table className={styles.table}>
+                  <thead className={styles.tableHead}>
                     <tr>
                       <td>
                         Name
@@ -138,14 +150,29 @@ export default function Home() {
                     </tr>
                   </tbody>
                 </table>
+            }
+            <button className = {styles.refresh} onClick={getFiveData} disabled={loading === true}> Refresh </button>
             </div>
+
 
             <div className = {styles.searchResults}>
               <h1> Search Results</h1>
-              {errors === "" && <p>{searchResults.name}</p>
-              } {errors === "" && <p>{searchResults.price}</p>}
+              {errors === "" && searchResults. name !== ""  && 
+              <table className={styles.table}>
+                <thead className={styles.tableHead}>
+                <tr><td>Current price of {searchResults.name} : </td></tr>
+                </thead>
+                <tbody>
+                  <tr><td>{searchResults.price} </td></tr>
+                </tbody>
+              </table>}
+              {searchLoading && <p> loading... </p>} {/* semi-lazy load indicator */}
               
               {errors && <p>{errors}</p>}
+              <form onSubmit = {handleSearch} className = {styles.searchForm}>
+                <input type="text" onChange={(e) => setSearched(e.target.value)} className={styles.search} placeholder="Enter a currency"></input>
+                <input type="submit" className={styles.refresh} value="Search" disabled={searchLoading === true}></input>
+              </form>
             </div>
           </div>
         </div>
