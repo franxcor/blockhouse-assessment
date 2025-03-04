@@ -1,8 +1,158 @@
-import Image from "next/image";
+'use client'
 import styles from "./page.module.css";
+import axios from 'axios';
+import { useState } from "react";
+
 
 export default function Home() {
+  const [errors, setErrors] = useState("");
+  const [fiveCryptoData, setFiveCryptoData] = useState({
+    one: {name: "", price: 0},
+    two: {name: "", price: 0},
+    three: {name: "", price: 0},
+    four: {name: "", price: 0},
+    five: {name: "", price: 0}
+  });
+
+  const [searchResults, setSearchResults] = useState ({
+    name: "",
+    price: 0,
+  })
+
+  const getFiveData = async () => {
+    let response = null;
+    
+    try {
+      response = await axios.get('https://api.coincap.io/v2/assets/');
+    } catch (ex) {
+      response = null;
+      console.log(ex);
+      //reject(ex);
+    }
+    if (response) {
+      //lazy grab of first 5 names and prices
+      const json = Object.values(response.data['data']);
+      setFiveCryptoData({
+        one: {name: json[0]["id"], price: json[0]["priceUsd"]},
+        two: {name: json[1]['id'], price: json[1]["priceUsd"]},
+        three: {name: json[2]['id'], price: json[2]["priceUsd"]},
+        four: {name: json[3]['id'], price: json[3]["priceUsd"]},
+        five: {name: json[4]['id'], price: json[4]["priceUsd"]}
+      });
+
+    }
+  };
+
+  const [searched, setSearched] = useState("");
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    console.log(searched);
+    let response = null;
+    try {
+      console.log(`https://api.coincap.io/v2/assets/${searched}`)
+      response = await axios.get(`https://api.coincap.io/v2/assets/${searched}`);
+    } catch (AxiosError) {
+      setErrors("This cryptocurrency doesn't exist. Please try again")
+      response = null;
+    }
+    if (response) {
+      const json = Object.values(response.data['data']);
+      
+      setSearchResults({
+        name: json[0], 
+        price: json[8]
+      });
+    }
+  }
+
+  //window.onload = getFiveData();
+
   return (
+    <div className={styles.section}>
+      <div className={styles.content}>
+      <button onClick={getFiveData}> Refresh </button>
+      <form onSubmit = {handleSearch}>
+        <input type="text" onChange={(e) => setSearched(e.target.value)} className={styles.search} placeholder="Enter a currency"></input>
+        <input type="submit" className={styles.searchSubmit} value="Search"></input>
+      </form>
+        <div className = {styles.infoDisplay}>
+          <h1> Welcome to Crypto Tracker </h1>
+          <div className = {styles.displays}>
+            <div className={styles.mainDashboard}>
+              <h1 className = {styles.dashTitle}> Top 5 Cryptocurrencies </h1>
+                <table>
+                  <thead>
+                    <tr>
+                      <td>
+                        Name
+                      </td>
+                      <td>
+                        Price
+                      </td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        {fiveCryptoData.one.name}
+                      </td>
+                      <td>
+                        {fiveCryptoData.one.price}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        {fiveCryptoData.two.name}
+                      </td>
+                      <td>
+                        {fiveCryptoData.two.price}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        {fiveCryptoData.three.name}
+                      </td>
+                      <td>
+                        {fiveCryptoData.three.price}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        {fiveCryptoData.four.name}
+                      </td>
+                      <td>
+                        {fiveCryptoData.four.price}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td>
+                        {fiveCryptoData.five.name}
+                      </td>
+                      <td>
+                        {fiveCryptoData.five.price}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+            </div>
+
+            <div className = {styles.searchResults}>
+              <h1> Search Results</h1>
+              {errors === "" && <p>{searchResults.name}</p>
+              } {errors === "" && <p>{searchResults.price}</p>}
+              
+              {errors && <p>{errors}</p>}
+            </div>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+    /* KEEPING THIS FOR SYNTAX REFERENCE 
     <div className={styles.page}>
       <main className={styles.main}>
         <Image
@@ -91,5 +241,6 @@ export default function Home() {
         </a>
       </footer>
     </div>
+    */
   );
 }
