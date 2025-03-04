@@ -53,6 +53,7 @@ export default function Home() {
     event.preventDefault();
     console.log(searched);
     setSearchLoading(true);
+    setErrors("");
     let response = null;
     try {
       console.log(`https://api.coincap.io/v2/assets/${searched}`)
@@ -65,7 +66,7 @@ export default function Home() {
     }
     if (response) {
       const json = Object.values(response.data['data']);
-      
+      console.log(json);
       setSearchResults({
         name: json[0], 
         price: json[8]
