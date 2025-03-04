@@ -100,29 +100,7 @@ const config = {
           },
         ],
       },
-      footer: {
-        style: 'dark',
-        links: [
-
-              {
-                label: 'Project Setup Guide',
-                to: '/docs/setup-guide/set-up-guide',
-              },
-              {
-                label: 'API Integration Details',
-                to: '/docs/api-details/api-int',
-              },
-              {
-                label: 'State Management Explanation',
-                to: '/docs/state-management/state-explain',
-              },
-              {
-                label: 'Challenges & Solutions',
-                to: '/docs/challenges-solutions/c-s.md',
-              },
-        ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
-      },
+      
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,

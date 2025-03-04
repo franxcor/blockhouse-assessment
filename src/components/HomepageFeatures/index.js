@@ -8,7 +8,7 @@ const FeatureList = [
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-      The three lined menu at the top left corner has links to all the pages/information that was required in this docusaurus website! The links are also displayed at the bottom of this page.
+      The three lined menu at the top left corner has links to all the pages/information that was required in this docusaurus website!
       </>
     ),
   },
